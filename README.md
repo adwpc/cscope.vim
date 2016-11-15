@@ -1,3 +1,6 @@
+# Change
+The found result will be listed in quickfix window!
+
 # Introduction
 Cscove(new name for this plugin, since cscope.vim is used too widely.) is a
 smart cscope helper for vim.

@@ -304,7 +304,7 @@ function! CscopeFind(action, word)
   endif
   call <SID>AutoloadDB(expand('%:p:h'))
   try
-    exe ':lcs f '.a:action.' '.a:word
+    exe ':cs f '.a:action.' '.a:word
     if g:cscope_open_location == 1
       lw
     endif
