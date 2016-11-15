@@ -1,5 +1,10 @@
 # Change
 The found result will be listed in quickfix window!
+you will like these keys, e.g.:
+
+    nnoremap <silent> <leader>qn :call QuickFixNext()<CR>
+    nnoremap <silent> <leader>qp :call QuickFixPrevious()<CR>
+    nnoremap <leader>qq :call QuickFixToggle()<cr>
 
 # Introduction
 Cscove(new name for this plugin, since cscope.vim is used too widely.) is a

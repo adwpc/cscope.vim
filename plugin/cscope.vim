@@ -11,8 +11,8 @@ if !exists('g:cscope_auto_update')
   let g:cscope_auto_update = 1
 endif
 
-if !exists('g:cscope_open_location')
-  let g:cscope_open_location = 1
+if !exists('g:cscope_open_quickfix')
+  let g:cscope_open_quickfix = 1
 endif
 
 if !exists('g:cscope_split_threshold')
@@ -25,20 +25,53 @@ function! s:echo(msg)
   endif
 endfunction
 
-function! ToggleLocationList()
-  let l:own = winnr()
-  lw
-  let l:cwn = winnr()
-  if(l:cwn == l:own)
-    if &buftype == 'quickfix'
-      lclose
-    elseif len(getloclist(winnr())) > 0
-      lclose
-    else
-      echohl WarningMsg | echo "No location list." | echohl None
+
+function! s:GetBufferList() 
+  redir =>buflist 
+  silent! ls 
+  redir END 
+  return buflist 
+endfunction
+
+function! QuickFixToggle()
+  for bufnum in map(filter(split(s:GetBufferList(), '\n'), 'v:val =~ "Quickfix List"'), 'str2nr(matchstr(v:val, "\\d\\+"))') 
+    if bufwinnr(bufnum) != -1
+      cclose
+      return
     endif
+  endfor
+  let winnr = winnr()
+    copen
+  if winnr() != winnr
+    wincmd p
   endif
 endfunction
+
+
+function! QuickFixPrevious()
+  try
+    cprev
+  catch /:E553:/
+    clast
+  catch /:E42:/
+    echo "list empty"
+  catch /.*/
+    echo v:exception
+  endtry
+endfunction
+
+function! QuickFixNext()
+  try
+    cnext
+  catch /:E553:/
+    cfirst
+  catch /:E42:/
+    echo "list empty"
+  catch /.*/
+    echo v:exception
+  endtry
+endfunction
+
 
 if !exists('g:cscope_cmd')
   if executable('cscope')
@@ -305,8 +338,8 @@ function! CscopeFind(action, word)
   call <SID>AutoloadDB(expand('%:p:h'))
   try
     exe ':cs f '.a:action.' '.a:word
-    if g:cscope_open_location == 1
-      lw
+    if g:cscope_open_quickfix == 1
+      cw
     endif
   catch
     echohl WarningMsg | echo 'Can not find '.a:word.' with querytype as '.a:action.'.' | echohl None
