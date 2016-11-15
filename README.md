@@ -2,8 +2,11 @@
 The found result will be listed in quickfix window!
 you will like these keys, e.g.:
 
+    " jump to next result in the quickfix window
     nnoremap <silent> <leader>qn :call QuickFixNext()<CR>
+    " jump to previous result in the quickfix window
     nnoremap <silent> <leader>qp :call QuickFixPrevious()<CR>
+    " open/close quickfix window
     nnoremap <leader>qq :call QuickFixToggle()<cr>
 
 # Introduction

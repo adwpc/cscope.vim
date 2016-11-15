@@ -1,14 +1,14 @@
-*cscove.txt*            cscove, a smart cscope helper for vim.          *cscove*
+*cscopex.txt*            cscopex, a smart cscope helper for vim.          *cscopex*
 
-1. About cscove                                    |cscove-about|
-2. Key Mappings                                    |cscove-keymappings|
-3. Functions                                       |cscove-funtions|
-4. Commands                                        |cscove-commands|
-5. Options                                         |cscove-options|
+1. About cscopex                                    |cscopex-about|
+2. Key Mappings                                    |cscopex-keymappings|
+3. Functions                                       |cscopex-funtions|
+4. Commands                                        |cscopex-commands|
+5. Options                                         |cscopex-options|
 
 =============================================================================
-1. ABOUT cscove ~
-                                                               *cscove-about*
+1. ABOUT cscopex ~
+                                                               *cscopex-about*
 
 Cscove(new name for this plugin, since cscope.vim is used too widely.) is a
 smart cscope helper for vim.
@@ -26,14 +26,14 @@ used for, the plugin will connect to the cscope database automatically. You
 need not take care of anything about cscope database.
 
 When you have a file edited/added in those folders for which cscope databases
-have been created, cscove will automatically update the corresponding database.
+have been created, cscopex will automatically update the corresponding database.
 
 Cscove frees you from creating/connecting/updating cscope database, let you
 focus on code browsing.
 
 =============================================================================
 2. KEY MAPPINGS ~
-                                                               *cscove-keymappings*
+                                                               *cscopex-keymappings*
 The default key mappings has been removed from the plugin itself, since users
 may prefer different choices.
 So to use the plugin, you must define your own key mappings first.
@@ -44,6 +44,7 @@ Below is the minimum key mappings.
     nnoremap <leader>l :call ToggleLocationList()<CR>
 
 Some optional key mappings to search directly.
+
 
     " s: Find this C symbol
     nnoremap  <leader>fs :call CscopeFind('s', expand('<cword>'))<CR>
@@ -61,10 +62,17 @@ Some optional key mappings to search directly.
     nnoremap  <leader>ff :call CscopeFind('f', expand('<cword>'))<CR>
     " i: Find files #including this file
     nnoremap  <leader>fi :call CscopeFind('i', expand('<cword>'))<CR>
+Some new key mappings you will like.
 
+  ¦ " jump to next result in the quickfix window
+  ¦ nnoremap <silent> <leader>qn :call QuickFixNext()<CR>
+  ¦ " jump to previous result in the quickfix window
+  ¦ nnoremap <silent> <leader>qp :call QuickFixPrevious()<CR>
+  ¦ " open/close quickfix window
+  ¦ nnoremap <leader>qq :call QuickFixToggle()<cr>
 =============================================================================
 3. FUNCTIONS ~
-                                                               *cscove-functions*
+                                                               *cscopex-functions*
 
 The plugin provides three public functions.
 
@@ -84,11 +92,11 @@ ToggleLocationList()
 
 =============================================================================
 4. Commands ~
-                                                               *cscove-commands*
+                                                               *cscopex-commands*
 You may need these commands sometimes.
                                                                *CscopeList*
 
-List all existing cscope databases that cscove has created for you.
+List all existing cscope databases that cscopex has created for you.
 
     :CscopeList
 
@@ -104,7 +112,7 @@ Here is example output from |:CscopeList|
                                                                *CscopeClear*
 
 Remove the database for specified folder or all existing cscope databases that
-cscove has created for you if no folder provided.
+cscopex has created for you if no folder provided.
 You can use <Tab> for completion.
 
     :CscopeClear <full_path>
@@ -113,7 +121,7 @@ You can use <Tab> for completion.
 
 =============================================================================
 5. OPTIONS ~
-                                                               *cscove-options*
+                                                               *cscopex-options*
 
                                                                 *'g:cscope_open_location'*
 Use this option to stop opening location list after searching
