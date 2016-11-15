@@ -1,6 +1,6 @@
 # Change
 The found result will be listed in quickfix window!
-you will like these keys, e.g.:
+you will like these new keys, e.g.:
 
     " jump to next result in the quickfix window
     nnoremap <silent> <leader>qn :call QuickFixNext()<CR>
