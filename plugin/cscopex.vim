@@ -171,6 +171,7 @@ function! s:_CreateDB(dir, init)
     let cscope_db = s:cscope_vim_dir.'/'.id.'.db'
     if ! filereadable(cscope_files)
       let files = <SID>ListFiles(a:dir)
+      echohl files
       call writefile(files, cscope_files)
     endif
   endif
