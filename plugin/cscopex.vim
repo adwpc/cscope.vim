@@ -225,7 +225,8 @@ function! s:LoadDB(dir)
   call <SID>FlushIndex()
 endfunction
 
-function! s:AutoloadDB(dir)
+" function! s:AutoloadDB(dir)
+function! AutoloadDB(dir)
   let m_dir = <SID>GetBestPath(a:dir)
   if m_dir == ""
     echohl WarningMsg | echo "Can not find proper cscope db, please input a path to generate cscope db for." | echohl None
@@ -336,7 +337,9 @@ function! CscopeFind(action, word)
   if len(dirtyDirs) > 0
     call <SID>updateDBs(dirtyDirs)
   endif
-  call <SID>AutoloadDB(expand('%:p:h'))
+  " call <SID>AutoloadDB(expand('%:p:h'))
+  " call AutoloadDB(expand('%:p:h:h'))
+  call AutoloadDB(getcwd())
   try
     exe ':cs f '.a:action.' '.a:word
     if g:cscope_open_quickfix == 1
@@ -361,7 +364,8 @@ endfunction
 
 function! s:onChange()
   if expand('%:t') =~? g:cscope_interested_files
-    let m_dir = <SID>GetBestPath(expand('%:p:h'))
+    " let m_dir = <SID>GetBestPath(expand('%:p:h'))
+    let m_dir = <SID>GetBestPath(getcwd())
     if m_dir != ""
       let s:dbs[m_dir]['dirty'] = 1
       call <SID>FlushIndex()
