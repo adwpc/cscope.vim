@@ -3,6 +3,8 @@
 "    License: The MIT License
 "
 
+let g:path = ''
+
 if !exists('g:cscope_silent')
   let g:cscope_silent = 0
 endif
@@ -26,22 +28,22 @@ function! s:echo(msg)
 endfunction
 
 
-function! s:GetBufferList() 
-  redir =>buflist 
-  silent! ls 
-  redir END 
-  return buflist 
+function! s:GetBufferList()
+  redir =>buflist
+  silent! ls
+  redir END
+  return buflist
 endfunction
 
 function! QuickFixToggle()
-  for bufnum in map(filter(split(s:GetBufferList(), '\n'), 'v:val =~ "Quickfix List"'), 'str2nr(matchstr(v:val, "\\d\\+"))') 
+  for bufnum in map(filter(split(s:GetBufferList(), '\n'), 'v:val =~ "Quickfix List"'), 'str2nr(matchstr(v:val, "\\d\\+"))')
     if bufwinnr(bufnum) != -1
       cclose
       return
     endif
   endfor
   let winnr = winnr()
-    copen
+  copen
   if winnr() != winnr
     wincmd p
   endif
@@ -227,20 +229,22 @@ endfunction
 
 " function! s:AutoloadDB(dir)
 function! AutoloadDB(dir)
-  let m_dir = <SID>GetBestPath(a:dir)
-  if m_dir == ""
+  if g:path == ''
+    let g:path = <SID>GetBestPath(a:dir)
+  end
+  if g:path == ''
     " echohl WarningMsg | echo "Can not find proper cscope db, please input a path to generate cscope db for." | echohl None
     " let m_dir = input("", a:dir, 'dir')
-    let m_dir = getcwd()
-    if m_dir != ''
-      let m_dir = <SID>CheckAbsolutePath(m_dir, a:dir)
-      call <SID>InitDB(m_dir)
-      call <SID>LoadDB(m_dir)
+    let g:path = getcwd()
+    if g:path != ''
+      let g:path = <SID>CheckAbsolutePath(g:path, a:dir)
+      call <SID>InitDB(g:path)
+      call <SID>LoadDB(g:path)
     endif
   else
-    let id = s:dbs[m_dir]['id']
+    let id = s:dbs[g:path]['id']
     if cscope_connection(2, s:cscope_vim_dir.'/'.id.'.db') == 0
-      call <SID>LoadDB(m_dir)
+      call <SID>LoadDB(g:path)
     endif
   endif
 endfunction
@@ -352,15 +356,15 @@ function! CscopeFind(action, word)
 endfunction
 
 function! CscopeFindInteractive(pat)
-    call inputsave()
-    let qt = input("\nChoose a querytype for '".a:pat."'(:help cscope-find)\n  c: functions calling this function\n  d: functions called by this function\n  e: this egrep pattern\n  f: this file\n  g: this definition\n  i: files #including this file\n  s: this C symbol\n  t: this text string\n\n  or\n  <querytype><pattern> to query `pattern` instead of '".a:pat."' as `querytype`, Ex. `smain` to query a C symbol named 'main'.\n> ")
-    call inputrestore()
-    if len(qt) > 1
-        call CscopeFind(qt[0], qt[1:])
-    elseif len(qt) > 0
-        call CscopeFind(qt, a:pat)
-    endif
-    call feedkeys("\<CR>")
+  call inputsave()
+  let qt = input("\nChoose a querytype for '".a:pat."'(:help cscope-find)\n  c: functions calling this function\n  d: functions called by this function\n  e: this egrep pattern\n  f: this file\n  g: this definition\n  i: files #including this file\n  s: this C symbol\n  t: this text string\n\n  or\n  <querytype><pattern> to query `pattern` instead of '".a:pat."' as `querytype`, Ex. `smain` to query a C symbol named 'main'.\n> ")
+  call inputrestore()
+  if len(qt) > 1
+    call CscopeFind(qt[0], qt[1:])
+  elseif len(qt) > 0
+    call CscopeFind(qt, a:pat)
+  endif
+  call feedkeys("\<CR>")
 endfunction
 
 function! s:onChange()
