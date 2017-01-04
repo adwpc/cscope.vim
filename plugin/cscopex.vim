@@ -229,8 +229,9 @@ endfunction
 function! AutoloadDB(dir)
   let m_dir = <SID>GetBestPath(a:dir)
   if m_dir == ""
-    echohl WarningMsg | echo "Can not find proper cscope db, please input a path to generate cscope db for." | echohl None
-    let m_dir = input("", a:dir, 'dir')
+    " echohl WarningMsg | echo "Can not find proper cscope db, please input a path to generate cscope db for." | echohl None
+    " let m_dir = input("", a:dir, 'dir')
+    let m_dir = getcwd()
     if m_dir != ''
       let m_dir = <SID>CheckAbsolutePath(m_dir, a:dir)
       call <SID>InitDB(m_dir)
