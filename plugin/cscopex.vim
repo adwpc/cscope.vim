@@ -3,8 +3,6 @@
 "    License: The MIT License
 "
 
-let g:path = ''
-
 if !exists('g:cscope_silent')
   let g:cscope_silent = 0
 endif
@@ -179,7 +177,7 @@ function! s:_CreateDB(dir, init)
   endif
   exec 'cs kill '.cscope_db
   redir @x
-  exec 'silent !'.g:cscope_cmd.' -b -i '.cscope_files.' -f'.cscope_db
+  exec 'silent !'.g:cscope_cmd.' -bkq -i '.cscope_files.' -f'.cscope_db
   redi END
   if @x =~ "\nCommand terminated\n"
     echohl WarningMsg | echo "Failed to create cscope database for ".a:dir.", please check if " | echohl None
@@ -191,6 +189,9 @@ endfunction
 
 function! s:CheckAbsolutePath(dir, defaultPath)
   let d = a:dir
+  if d == '.'
+    let d = getcwd()
+  endif
   while 1
     if !isdirectory(d)
       echohl WarningMsg | echo "Please input a valid path." | echohl None
@@ -227,24 +228,20 @@ function! s:LoadDB(dir)
   call <SID>FlushIndex()
 endfunction
 
-" function! s:AutoloadDB(dir)
-function! AutoloadDB(dir)
-  if g:path == ''
-    let g:path = <SID>GetBestPath(a:dir)
-  end
-  if g:path == ''
-    " echohl WarningMsg | echo "Can not find proper cscope db, please input a path to generate cscope db for." | echohl None
-    " let m_dir = input("", a:dir, 'dir')
-    let g:path = getcwd()
-    if g:path != ''
-      let g:path = <SID>CheckAbsolutePath(g:path, a:dir)
-      call <SID>InitDB(g:path)
-      call <SID>LoadDB(g:path)
+function! s:AutoloadDB(dir)
+  let m_dir = <SID>GetBestPath(a:dir)
+  if m_dir == ""
+    echohl WarningMsg | echo "Can not find proper cscope db, please input a path to generate cscope db for." | echohl None
+    let m_dir = input("", a:dir, 'dir')
+    if m_dir != ''
+      let m_dir = <SID>CheckAbsolutePath(m_dir, a:dir)
+      call <SID>InitDB(m_dir)
+      call <SID>LoadDB(m_dir)
     endif
   else
-    let id = s:dbs[g:path]['id']
+    let id = s:dbs[m_dir]['id']
     if cscope_connection(2, s:cscope_vim_dir.'/'.id.'.db') == 0
-      call <SID>LoadDB(g:path)
+      call <SID>LoadDB(m_dir)
     endif
   endif
 endfunction
@@ -342,12 +339,11 @@ function! CscopeFind(action, word)
   if len(dirtyDirs) > 0
     call <SID>updateDBs(dirtyDirs)
   endif
-  " call <SID>AutoloadDB(expand('%:p:h'))
-  " call AutoloadDB(expand('%:p:h:h'))
-  call AutoloadDB(getcwd())
+  call <SID>AutoloadDB(expand('%:p:h'))
   try
     exe ':cs f '.a:action.' '.a:word
     if g:cscope_open_quickfix == 1
+      ccl
       cw
     endif
   catch
@@ -369,8 +365,7 @@ endfunction
 
 function! s:onChange()
   if expand('%:t') =~? g:cscope_interested_files
-    " let m_dir = <SID>GetBestPath(expand('%:p:h'))
-    let m_dir = <SID>GetBestPath(getcwd())
+    let m_dir = <SID>GetBestPath(expand('%:p:h'))
     if m_dir != ""
       let s:dbs[m_dir]['dirty'] = 1
       call <SID>FlushIndex()
@@ -384,10 +379,7 @@ endfunction
 function! CscopeUpdateDB()
   call <SID>updateDBs(keys(s:dbs))
 endfunction
-if exists('g:cscope_preload_path')
-  call <SID>preloadDB()
-endif
-
+" preload here
 if g:cscope_auto_update == 1
   au BufWritePost * call <SID>onChange()
 endif
@@ -401,3 +393,11 @@ com! -nargs=? -complete=customlist,<SID>listDirs CscopeClear call <SID>clearDBs(
 
 com! -nargs=0 CscopeList call <SID>listDBs()
 call <SID>loadIndex()
+if exists('g:cscope_preload_path')
+  if expand('%:t') =~? g:cscope_interested_files
+  " if stridx(expand('%:t'), '.c') > -1 || stridx(expand('%:t'), '.h') > -1 || stridx(expand('%:t'), '.cpp') > -1 || stridx(expand('%:t'), '.hpp') > -1 || stridx(expand('%:t'), '.cc') > -1 || stridx(expand('%:t'), '.java') > -1
+    call <SID>preloadDB()
+  endif
+endif
+
+
