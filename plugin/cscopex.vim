@@ -26,22 +26,22 @@ function! s:echo(msg)
 endfunction
 
 
-function! s:GetBufferList() 
-  redir =>buflist 
-  silent! ls 
-  redir END 
-  return buflist 
+function! s:GetBufferList()
+  redir =>buflist
+  silent! ls
+  redir END
+  return buflist
 endfunction
 
 function! QuickFixToggle()
-  for bufnum in map(filter(split(s:GetBufferList(), '\n'), 'v:val =~ "Quickfix List"'), 'str2nr(matchstr(v:val, "\\d\\+"))') 
+  for bufnum in map(filter(split(s:GetBufferList(), '\n'), 'v:val =~ "Quickfix List"'), 'str2nr(matchstr(v:val, "\\d\\+"))')
     if bufwinnr(bufnum) != -1
       cclose
       return
     endif
   endfor
   let winnr = winnr()
-    copen
+  copen
   if winnr() != winnr
     wincmd p
   endif
@@ -171,12 +171,13 @@ function! s:_CreateDB(dir, init)
     let cscope_db = s:cscope_vim_dir.'/'.id.'.db'
     if ! filereadable(cscope_files)
       let files = <SID>ListFiles(a:dir)
+      echohl files
       call writefile(files, cscope_files)
     endif
   endif
   exec 'cs kill '.cscope_db
   redir @x
-  exec 'silent !'.g:cscope_cmd.' -b -i '.cscope_files.' -f'.cscope_db
+  exec 'silent !'.g:cscope_cmd.' -bkq -i '.cscope_files.' -f'.cscope_db
   redi END
   if @x =~ "\nCommand terminated\n"
     echohl WarningMsg | echo "Failed to create cscope database for ".a:dir.", please check if " | echohl None
@@ -188,6 +189,9 @@ endfunction
 
 function! s:CheckAbsolutePath(dir, defaultPath)
   let d = a:dir
+  if d == '.'
+    let d = getcwd()
+  endif
   while 1
     if !isdirectory(d)
       echohl WarningMsg | echo "Please input a valid path." | echohl None
@@ -339,6 +343,7 @@ function! CscopeFind(action, word)
   try
     exe ':cs f '.a:action.' '.a:word
     if g:cscope_open_quickfix == 1
+      ccl
       cw
     endif
   catch
@@ -347,15 +352,15 @@ function! CscopeFind(action, word)
 endfunction
 
 function! CscopeFindInteractive(pat)
-    call inputsave()
-    let qt = input("\nChoose a querytype for '".a:pat."'(:help cscope-find)\n  c: functions calling this function\n  d: functions called by this function\n  e: this egrep pattern\n  f: this file\n  g: this definition\n  i: files #including this file\n  s: this C symbol\n  t: this text string\n\n  or\n  <querytype><pattern> to query `pattern` instead of '".a:pat."' as `querytype`, Ex. `smain` to query a C symbol named 'main'.\n> ")
-    call inputrestore()
-    if len(qt) > 1
-        call CscopeFind(qt[0], qt[1:])
-    elseif len(qt) > 0
-        call CscopeFind(qt, a:pat)
-    endif
-    call feedkeys("\<CR>")
+  call inputsave()
+  let qt = input("\nChoose a querytype for '".a:pat."'(:help cscope-find)\n  c: functions calling this function\n  d: functions called by this function\n  e: this egrep pattern\n  f: this file\n  g: this definition\n  i: files #including this file\n  s: this C symbol\n  t: this text string\n\n  or\n  <querytype><pattern> to query `pattern` instead of '".a:pat."' as `querytype`, Ex. `smain` to query a C symbol named 'main'.\n> ")
+  call inputrestore()
+  if len(qt) > 1
+    call CscopeFind(qt[0], qt[1:])
+  elseif len(qt) > 0
+    call CscopeFind(qt, a:pat)
+  endif
+  call feedkeys("\<CR>")
 endfunction
 
 function! s:onChange()
@@ -374,10 +379,7 @@ endfunction
 function! CscopeUpdateDB()
   call <SID>updateDBs(keys(s:dbs))
 endfunction
-if exists('g:cscope_preload_path')
-  call <SID>preloadDB()
-endif
-
+" preload here
 if g:cscope_auto_update == 1
   au BufWritePost * call <SID>onChange()
 endif
@@ -387,7 +389,16 @@ set cscopequickfix=s-,g-,d-,c-,t-,e-,f-,i-
 function! s:listDirs(A,L,P)
   return keys(s:dbs)
 endfunction
-com! -nargs=? -complete=customlist,<SID>listDirs CscopeClear call <SID>clearDBs("<args>")
+com! -nargs=? -complete=customlist,<SID>listDirs CscopeClear call <SID>clearDBs("<args>") 
 
 com! -nargs=0 CscopeList call <SID>listDBs()
+com! -nargs=0 CscopeUpdate call <SID>AutoloadDB(expand('%:p:h'))
 call <SID>loadIndex()
+if exists('g:cscope_preload_path')
+  if expand('%:t') =~? g:cscope_interested_files
+  " if stridx(expand('%:t'), '.c') > -1 || stridx(expand('%:t'), '.h') > -1 || stridx(expand('%:t'), '.cpp') > -1 || stridx(expand('%:t'), '.hpp') > -1 || stridx(expand('%:t'), '.cc') > -1 || stridx(expand('%:t'), '.java') > -1
+    call <SID>preloadDB()
+  endif
+endif
+
+
