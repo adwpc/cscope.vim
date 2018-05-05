@@ -244,6 +244,7 @@ function! s:AutoloadDB(dir)
       call <SID>LoadDB(m_dir)
     endif
   endif
+  exec "redraw!"
 endfunction
 
 function! s:updateDBs(dirs)
@@ -376,8 +377,18 @@ function! s:onChange()
   endif
 endfunction
 
-function! CscopeUpdateDB()
-  call <SID>updateDBs(keys(s:dbs))
+function! s:CscopeUpdateDB()
+  call <SID>clearDBs(expand('%:p:h'))
+  let dirtyDirs = []
+  for d in keys(s:dbs)
+    if s:dbs[d]['dirty'] == 1
+      call add(dirtyDirs, d)
+    endif
+  endfor
+  if len(dirtyDirs) > 0
+    call <SID>updateDBs(dirtyDirs)
+  endif
+  call <SID>AutoloadDB(expand('%:p:h'))
 endfunction
 " preload here
 if g:cscope_auto_update == 1
@@ -389,10 +400,10 @@ set cscopequickfix=s-,g-,d-,c-,t-,e-,f-,i-
 function! s:listDirs(A,L,P)
   return keys(s:dbs)
 endfunction
-com! -nargs=? -complete=customlist,<SID>listDirs CscopeClear call <SID>clearDBs("<args>") 
+" com! -nargs=? -complete=customlist,<SID>listDirs CscopeClear call <SID>clearDBs("<args>") 
 
 com! -nargs=0 CscopeList call <SID>listDBs()
-com! -nargs=0 CscopeUpdate call <SID>AutoloadDB(expand('%:p:h'))
+com! -nargs=0 CscopeUpdate call <SID>CscopeUpdateDB()
 call <SID>loadIndex()
 if exists('g:cscope_preload_path')
   if expand('%:t') =~? g:cscope_interested_files
