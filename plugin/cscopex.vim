@@ -34,7 +34,7 @@ function! s:GetBufferList()
 endfunction
 
 function! QuickFixToggle()
-  for bufnum in map(filter(split(s:GetBufferList(), '\n'), 'v:val =~ "Quickfix List"'), 'str2nr(matchstr(v:val, "\\d\\+"))')
+  for bufnum in map(filter(split(s:GetBufferList(), '\n'), 'v:val =~ "Quickfix"'), 'str2nr(matchstr(v:val, "\\d\\+"))')
     if bufwinnr(bufnum) != -1
       cclose
       return
