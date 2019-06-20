@@ -378,7 +378,7 @@ function! s:onChange()
 endfunction
 
 function! s:CscopeUpdateDB()
-  call <SID>clearDBs(expand('%:p:h'))
+  call <SID>clearDBs(getcwd())
   let dirtyDirs = []
   for d in keys(s:dbs)
     if s:dbs[d]['dirty'] == 1
