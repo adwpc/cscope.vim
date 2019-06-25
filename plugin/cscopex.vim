@@ -340,7 +340,7 @@ function! CscopeFind(action, word)
   if len(dirtyDirs) > 0
     call <SID>updateDBs(dirtyDirs)
   endif
-  call <SID>AutoloadDB(expand('%:p:h'))
+  call <SID>AutoloadDB(getcwd())
   try
     exe ':cs f '.a:action.' '.a:word
     if g:cscope_open_quickfix == 1
@@ -388,7 +388,7 @@ function! s:CscopeUpdateDB()
   if len(dirtyDirs) > 0
     call <SID>updateDBs(dirtyDirs)
   endif
-  call <SID>AutoloadDB(expand('%:p:h'))
+  call <SID>preloadDB()
 endfunction
 " preload here
 if g:cscope_auto_update == 1
@@ -400,14 +400,14 @@ set cscopequickfix=s-,g-,d-,c-,t-,e-,f-,i-
 function! s:listDirs(A,L,P)
   return keys(s:dbs)
 endfunction
-" com! -nargs=? -complete=customlist,<SID>listDirs CscopeClear call <SID>clearDBs("<args>") 
+" com! -nargs=? -complete=customlist,<SID>listDirs CscopeClear call <SID>clearDBs("<args>")
 
 com! -nargs=0 CscopeList call <SID>listDBs()
 com! -nargs=0 CscopeUpdate call <SID>CscopeUpdateDB()
 call <SID>loadIndex()
 if exists('g:cscope_preload_path')
   if expand('%:t') =~? g:cscope_interested_files
-  " if stridx(expand('%:t'), '.c') > -1 || stridx(expand('%:t'), '.h') > -1 || stridx(expand('%:t'), '.cpp') > -1 || stridx(expand('%:t'), '.hpp') > -1 || stridx(expand('%:t'), '.cc') > -1 || stridx(expand('%:t'), '.java') > -1
+    " if stridx(expand('%:t'), '.c') > -1 || stridx(expand('%:t'), '.h') > -1 || stridx(expand('%:t'), '.cpp') > -1 || stridx(expand('%:t'), '.hpp') > -1 || stridx(expand('%:t'), '.cc') > -1 || stridx(expand('%:t'), '.java') > -1
     call <SID>preloadDB()
   endif
 endif
